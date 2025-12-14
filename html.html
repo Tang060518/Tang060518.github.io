@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>铜官窑纹样数据库</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        
+        .search-section {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background-color: #A0522D;
+        }
+        
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* 新增：上传区域样式 */
+        .upload-section {
+            padding: 20px;
+            background-color: #fff8e1;
+            border-bottom: 1px solid #ffd54f;
+            text-align: center;
+        }
+
+        .upload-area {
+            display: inline-block;
+            padding: 15px 25px;
+            background-color: #ffecb3;
+            border: 2px dashed #ffb300;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .upload-area:hover {
+            background-color: #ffe082;
+        }
+
+        .upload-input {
+            display: none;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 30px;
+        }
+        
+        .item-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        
+        .item-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* 新增：编辑按钮 */
+        .edit-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(139, 69, 19, 0.8);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .item-card:hover .edit-btn {
+            opacity: 1;
+        }
+
+        .item-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #eaeaea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #8B4513;
+            position: relative;
+        }
+
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .item-info {
+            padding: 15px;
+        }
+        
+        .item-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 0 0 8px 0;
+            color: #333;
+        }
+        
+        .item-description {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.4;
+            margin: 0 0 10px 0;
+        }
+        
+        .item-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            color: #888;
+        }
+        
+        .pattern-category {
+            background-color: #e3f2fd;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+        
+        .pattern-list {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .pattern-item {
+            display: inline-block;
+            background-color: #f5f5f5;
+            padding: 3px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>铜官窑纹样数据库</h1>
+            <p class="subtitle">基于黑石号沉船与长沙窑址出土器物纹样分类系统</p>
+        </header>
+
+        <!-- 新增：上传区域 -->
+        <section class="upload-section">
+            <label class="upload-area" for="globalImageUpload">
+                📷 点击此处上传全局默认图片（用于所有无图项）
+            </label>
+            <input type="file" id="globalImageUpload" class="upload-input" accept="image/*">
+        </section>
+        
+        <section class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索纹样名称或描述...">
+                <button onclick="searchItems()">搜索</button>
+            </div>
+            
+            <div class="filters">
+                <select id="typeFilter" onchange="filterItems()">
+                    <option value="">全部类型</option>
+                    <option value="textPatterns">文字纹样</option>
+                    <option value="moldAppliquéPatterns">模印贴花纹样</option>
+                    <option value="animalPatterns">动物纹样</option>
+                    <option value="plantPatterns">植物纹样</option>
+                    <option value="figurePatterns">人物纹样</option>
+                </select>
+                
+                <select id="periodFilter" onchange="filterItems()">
+                    <option value="">全部时期</option>
+                    <option value="唐代">唐代</option>
+                    <option value="五代">五代</option>
+                    <option value="宋代">宋代</option>
+                </select>
+            </div>
+        </section>
+        
+        <main>
+            <div class="items-grid" id="itemsGrid">
+                <!-- 铜官窑纹样卡片将通过JavaScript动态生成 -->
+            </div>
+        </main>
+    </div>
+    
+    <footer>
+        <p>铜官窑纹样数据库 © 2023 | 记录千年陶瓷文化</p>
+    </footer>
+
+    <script>
+        // 黑石号沉船与长沙窑址出土器物纹样分类代码
+        var blackStoneShipPatterns = {
+          textPatterns: ["阿拉伯文"],
+          moldAppliquéPatterns: ["模印贴花椰枣纹", "印贴花对鸟纹"],
+          animalPatterns: ["奔狮纹", "蹲狮纹", "龙纹", "飞鸟纹", "双鱼纹", "摩羯纹", "对鸟椰枣纹", "鸟歇莲叶纹"],
+          plantPatterns: ["椰枣纹", "团花纹", "莲花纹", "折枝花卉纹", "褐绿彩花草纹", "红彩花草纹"],
+          figurePatterns: ["打马球人物纹", "胡人骑象纹", "胡人奏乐纹", "胡旋舞纹", "胡人纹", "童子坐莲纹"]
+        };
+
+        // 构建纹样数据库
+        var itemsData = [];
+        var idCounter = 1;
+        var categories = ['textPatterns', 'moldAppliquéPatterns', 'animalPatterns', 'plantPatterns', 'figurePatterns'];
+        var globalDefaultImageUrl = '';
+
+        function getPatternDescription(pattern) {
+          var descriptions = {
+            "阿拉伯文": "唐代铜官窑器物上的阿拉伯文字装饰，反映了当时对外贸易的繁荣",
+            "模印贴花椰枣纹": "使用模印工艺制作的椰枣纹样，体现了中外文化交流的特色",
+            "印贴花对鸟纹": "对称的鸟类纹样，常见于唐代铜官窑瓷器装饰",
+            "奔狮纹": "动态的狮子纹样，展现唐代工艺美术的生动性",
+            "蹲狮纹": "静态的狮子纹样，象征威严与力量",
+            "龙纹": "中国传统纹样，唐代瓷器上的龙纹具有独特风格",
+            "飞鸟纹": "飞翔的鸟类纹样，线条流畅自然",
+            "双鱼纹": "成对的鱼类纹样，寓意吉祥如意",
+            "摩羯纹": "源自印度神话的神兽纹样，唐代广泛流行",
+            "对鸟椰枣纹": "结合鸟类与椰枣的复合纹样，体现多元文化融合",
+            "鸟歇莲叶纹": "鸟类栖息于莲叶的纹样，意境优美",
+            "椰枣纹": "模仿椰枣果实的植物纹样，具有异域风情",
+            "团花纹": "团状花卉纹样，唐代常见的装饰图案",
+            "莲花纹": "佛教文化影响下的莲花纹样，寓意清净高雅",
+            "折枝花卉纹": "折枝花卉纹样，表现自然之美",
+            "褐绿彩花草纹": "使用褐绿彩绘制的花草纹样，色彩丰富",
+            "红彩花草纹": "使用红彩绘制的花草纹样，鲜艳夺目",
+            "打马球人物纹": "描绘马球运动的人物纹样，反映唐代体育活动",
+            "胡人骑象纹": "胡人骑象的复合纹样，展现中外文化交流",
+            "胡人奏乐纹": "胡人演奏乐器的纹样，体现唐代音乐文化",
+            "胡旋舞纹": "胡人表演胡旋舞的纹样，反映唐代舞蹈艺术",
+            "胡人纹": "胡人形象纹样，反映唐代多元文化",
+            "童子坐莲纹": "童子坐于莲花的纹样，寓意吉祥美好"
+          };
+          return descriptions[pattern] || "唐代铜官窑经典纹样";
+        }
+
+        function getCategoryDisplayName(category) {
+          var names = {
+            "textPatterns": "文字纹样",
+            "moldAppliquéPatterns": "模印贴花纹样",
+            "animalPatterns": "动物纹样",
+            "plantPatterns": "植物纹样",
+            "figurePatterns": "人物纹样"
+          };
+          return names[category] || "纹样";
+        }
+
+        // 初始化数据
+        for (var i = 0; i < categories.length; i++) {
+          var category = categories[i];
+          var patterns = blackStoneShipPatterns[category];
+          var categoryName = getCategoryDisplayName(category);
+          
+          for (var j = 0; j < patterns.length; j++) {
+            var pattern = patterns[j];
+            itemsData.push({
+              id: idCounter++,
+              title: pattern,
+              description: getPatternDescription(pattern),
+              type: categoryName,
+              period: "唐代",
+              dimensions: "不详",
+              location: "黑石号沉船/长沙窑址出土",
+              image_url: "", // 初始为空
+              category: category
+            });
+          }
+        }
+
+        // 渲染纹样卡片
+        function renderItems(items) {
+            var grid = document.getElementById('itemsGrid');
+            grid.innerHTML = '';
+            
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                var card = document.createElement('div');
+                card.className = 'item-card';
+                card.dataset.id = item.id;
+                
+                var imageDiv = document.createElement('div');
+                imageDiv.className = 'item-image';
+
+                // 显示图片或占位符
+                if (item.image_url) {
+                    var img = document.createElement('img');
+                    img.src = item.image_url;
+                    img.alt = item.title;
+                    imageDiv.appendChild(img);
+                } else if (globalDefaultImageUrl) {
+                    var img = document.createElement('img');
+                    img.src = globalDefaultImageUrl;
+                    img.alt = "默认图片";
+                    imageDiv.appendChild(img);
+                } else {
+                    imageDiv.textContent = '🏺';
+                    imageDiv.style.fontSize = '48px';
+                    imageDiv.style.color = '#8B4513';
+                    imageDiv.style.backgroundColor = '#f0f0f0';
+                }
+
+                // 编辑按钮
+                var editBtn = document.createElement('button');
+                editBtn.className = 'edit-btn';
+                editBtn.textContent = '✏️';
+                editBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    var cardId = this.closest('.item-card').dataset.id;
+                    uploadImageForItem(cardId);
+                };
+                imageDiv.appendChild(editBtn);
+                
+                var infoDiv = document.createElement('div');
+                infoDiv.className = 'item-info';
+                
+                var title = document.createElement('h3');
+                title.className = 'item-title';
+                title.textContent = item.title;
+                
+                var desc = document.createElement('p');
+                desc.className = 'item-description';
+                desc.textContent = item.description;
+                
+                var details = document.createElement('div');
+                details.className = 'item-details';
+                details.innerHTML = `<span>${item.period}</span><span>${item.dimensions}</span>`;
+                
+                var categoryLabel = document.createElement('div');
+                categoryLabel.className = 'pattern-category';
+                categoryLabel.textContent = item.type;
+                
+                var patternList = document.createElement('div');
+                patternList.className = 'pattern-list';
+                patternList.innerHTML = '<strong>纹样:</strong> ';
+                var patternItem = document.createElement('span');
+                patternItem.className = 'pattern-item';
+                patternItem.textContent = item.title;
+                patternList.appendChild(patternItem);
+                
+                infoDiv.appendChild(title);
+                infoDiv.appendChild(desc);
+                infoDiv.appendChild(details);
+                infoDiv.appendChild(categoryLabel);
+                infoDiv.appendChild(patternList);
+                
+                card.appendChild(imageDiv);
+                card.appendChild(infoDiv);
+                grid.appendChild(card);
+            }
+        }
+
+        // 为指定条目上传图片
+        function uploadImageForItem(itemId) {
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                var file = e.target.files[0];
+                if (!file) return;
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    var url = event.target.result;
+                    // 更新数据
+                    for (var i = 0; i < itemsData.length; i++) {
+                        if (itemsData[i].id == itemId) {
+                            itemsData[i].image_url = url;
+                            break;
+                        }
+                    }
+                    searchItems(); // 重新渲染
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+
+        // 全局默认图片上传
+        document.getElementById('globalImageUpload').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                globalDefaultImageUrl = event.target.result;
+                searchItems(); // 重新渲染所有卡片
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // 搜索与过滤
+        function searchItems() {
+            var searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            var typeFilter = document.getElementById('typeFilter').value;
+            var periodFilter = document.getElementById('periodFilter').value;
+            
+            var filtered = [];
+            for (var i = 0; i < itemsData.length; i++) {
+                var item = itemsData[i];
+                var matchesSearch = item.title.toLowerCase().includes(searchTerm) || 
+                                    item.description.toLowerCase().includes(searchTerm);
+                var matchesType = !typeFilter || item.category === typeFilter;
+                var matchesPeriod = !periodFilter || item.period === periodFilter;
+                
+                if (matchesSearch && matchesType && matchesPeriod) {
+                    filtered.push(item);
+                }
+            }
+            renderItems(filtered);
+        }
+
+        function filterItems() {
+            searchItems();
+        }
+
+        // 页面加载
+        document.addEventListener('DOMContentLoaded', function() {
+            renderItems(itemsData);
+            // 回车搜索
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchItems();
+            });
+        });
+    </script>
+</body>
+</html>
